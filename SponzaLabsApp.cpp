@@ -55,6 +55,18 @@ SponzaLabsApp::~SponzaLabsApp()
     {
         FlushCommandQueue();
     }
+
+    if(mHelpOverlayFont != nullptr)
+    {
+        DeleteObject(mHelpOverlayFont);
+        mHelpOverlayFont = nullptr;
+    }
+
+    if(mHelpOverlayBrush != nullptr)
+    {
+        DeleteObject(mHelpOverlayBrush);
+        mHelpOverlayBrush = nullptr;
+    }
 }
 
 bool SponzaLabsApp::Initialize()
@@ -65,6 +77,8 @@ bool SponzaLabsApp::Initialize()
     {
         return false;
     }
+
+    CreateHelpOverlay();
 
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
@@ -98,13 +112,36 @@ bool SponzaLabsApp::Initialize()
     return true;
 }
 
+LRESULT SponzaLabsApp::MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+    if(msg == WM_CTLCOLORSTATIC && reinterpret_cast<HWND>(lParam) == mHelpOverlayWnd)
+    {
+        HDC dc = reinterpret_cast<HDC>(wParam);
+        SetBkColor(dc, RGB(18, 24, 31));
+        SetTextColor(dc, RGB(238, 242, 247));
+        return reinterpret_cast<LRESULT>(mHelpOverlayBrush);
+    }
+
+    const LRESULT result = D3DApp::MsgProc(hwnd, msg, wParam, lParam);
+
+    if((msg == WM_SIZE || msg == WM_EXITSIZEMOVE) && mHelpOverlayWnd != nullptr)
+    {
+        LayoutHelpOverlay();
+    }
+
+    return result;
+}
+
 void SponzaLabsApp::ResetCameraToScene()
 {
-    const XMFLOAT3 target = mSceneFocusPoint;
+    const XMFLOAT3 target(
+        mSceneFocusPoint.x,
+        5.2f,
+        mSceneFocusPoint.z + mSceneRadius * 0.28f);
     const XMFLOAT3 position(
-        target.x - mSceneRadius * 0.18f,
-        target.y + mSceneRadius * 0.18f,
-        target.z - mSceneRadius * 1.55f);
+        mSceneFocusPoint.x,
+        5.8f,
+        mSceneFocusPoint.z - mSceneRadius * 0.58f);
 
     mCamera.LookAt(position, target, XMFLOAT3(0.0f, 1.0f, 0.0f));
     mCamera.UpdateViewMatrix();
@@ -127,6 +164,86 @@ void SponzaLabsApp::UpdateWindowCaption()
 
     SetWindowText(mhMainWnd, caption.c_str());
     mMainWndCaption = caption;
+    UpdateHelpOverlay();
+}
+
+void SponzaLabsApp::CreateHelpOverlay()
+{
+    if(mhMainWnd == nullptr || mHelpOverlayWnd != nullptr)
+    {
+        return;
+    }
+
+    mHelpOverlayBrush = CreateSolidBrush(RGB(18, 24, 31));
+    mHelpOverlayFont = CreateFontW(
+        -17,
+        0,
+        0,
+        0,
+        FW_MEDIUM,
+        FALSE,
+        FALSE,
+        FALSE,
+        DEFAULT_CHARSET,
+        OUT_DEFAULT_PRECIS,
+        CLIP_DEFAULT_PRECIS,
+        CLEARTYPE_QUALITY,
+        DEFAULT_PITCH | FF_SWISS,
+        L"Segoe UI");
+
+    mHelpOverlayWnd = CreateWindowExW(
+        0,
+        L"STATIC",
+        L"",
+        WS_CHILD | WS_VISIBLE | WS_BORDER | SS_LEFT | SS_NOPREFIX,
+        12,
+        12,
+        368,
+        286,
+        mhMainWnd,
+        nullptr,
+        AppInst(),
+        nullptr);
+
+    SendMessageW(mHelpOverlayWnd, WM_SETFONT, reinterpret_cast<WPARAM>(mHelpOverlayFont), TRUE);
+    LayoutHelpOverlay();
+    UpdateHelpOverlay();
+}
+
+void SponzaLabsApp::LayoutHelpOverlay()
+{
+    if(mHelpOverlayWnd == nullptr)
+    {
+        return;
+    }
+
+    SetWindowPos(mHelpOverlayWnd, HWND_TOP, 14, 14, 368, 286, SWP_NOACTIVATE);
+}
+
+void SponzaLabsApp::UpdateHelpOverlay()
+{
+    if(mHelpOverlayWnd == nullptr)
+    {
+        return;
+    }
+
+    const std::wstring renderMode = mRenderMode == RenderMode::Deferred ? L"Deferred" : L"Forward";
+    const std::wstring overlayText =
+        L"Controls\r\n"
+        L"W / A / S / D   move camera\r\n"
+        L"Mouse           rotate camera\r\n"
+        L"1               forward render\r\n"
+        L"2               deferred render\r\n"
+        L"F               frustum culling: " + std::wstring(mEnableFrustumCulling ? L"ON" : L"OFF") + L"\r\n"
+        L"O               octree: " + std::wstring(mEnableOctree ? L"ON" : L"OFF") + L"\r\n"
+        L"T               tessellation: " + std::wstring(mEnableTessellation ? L"ON" : L"OFF") + L"\r\n"
+        L"H / F1          show or hide help\r\n"
+        L"Home            reset camera\r\n"
+        L"Mode            " + renderMode + L"\r\n"
+        L"Scatter         " + std::to_wstring(mVisibleScatterItems.size()) + L" / " + std::to_wstring(mScatterItems.size());
+
+    SetWindowTextW(mHelpOverlayWnd, overlayText.c_str());
+    ShowWindow(mHelpOverlayWnd, mShowHelpOverlay ? SW_SHOW : SW_HIDE);
 }
 
 void SponzaLabsApp::OnResize()
@@ -140,4 +257,6 @@ void SponzaLabsApp::OnResize()
     {
         mGBuffer.OnResize(md3dDevice.Get(), mClientWidth, mClientHeight, mDepthStencilBuffer.Get());
     }
+
+    LayoutHelpOverlay();
 }

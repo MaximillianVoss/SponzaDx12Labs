@@ -96,9 +96,14 @@ void SponzaLabsApp::OnKeyboardInput(const GameTimer& gt)
     {
         mEnableTessellation = !mEnableTessellation;
     }
-    if(ConsumeKeyPress('H'))
+    if(ConsumeKeyPress('H') || ConsumeKeyPress(VK_F1))
     {
         mShowHelpOverlay = !mShowHelpOverlay;
+        UpdateHelpOverlay();
+    }
+    if(ConsumeKeyPress(VK_HOME))
+    {
+        ResetCameraToScene();
     }
 
     mCamera.UpdateViewMatrix();

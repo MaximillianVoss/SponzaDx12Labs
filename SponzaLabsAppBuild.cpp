@@ -525,11 +525,11 @@ void SponzaLabsApp::BuildRenderItems()
     tessellationItem->BaseVertexLocation = mGeometries["tessPatchGeo"]->DrawArgs["patch"].BaseVertexLocation;
     {
         const XMMATRIX patchWorld =
-            XMMatrixScaling(1.35f, 1.0f, 1.35f) *
+            XMMatrixScaling(4.0f, 1.0f, 4.0f) *
             XMMatrixTranslation(
-                mSceneFocusPoint.x - mSceneRadius * 0.72f,
-                0.02f,
-                mSceneFocusPoint.z - mSceneRadius * 0.86f);
+                mSceneFocusPoint.x,
+                0.05f,
+                mSceneFocusPoint.z + mSceneRadius * 0.10f);
         XMStoreFloat4x4(&tessellationItem->World, patchWorld);
         tessellationItem->Bounds = TransformBoundingBox(mGeometries["tessPatchGeo"]->DrawArgs["patch"].Bounds, patchWorld);
     }
@@ -546,8 +546,8 @@ void SponzaLabsApp::BuildScatterItems()
     UINT nextObjectIndex = static_cast<UINT>(mAllRitems.size());
     const int gridHalfExtent = 12;
     const float spacing = 3.2f;
-    const float scatterOriginX = mSceneFocusPoint.x + mSceneRadius * 3.0f;
-    const float scatterOriginZ = mSceneFocusPoint.z;
+    const float scatterOriginX = mSceneFocusPoint.x + mSceneRadius * 4.5f;
+    const float scatterOriginZ = mSceneFocusPoint.z + mSceneRadius * 2.8f;
 
     for(int z = -gridHalfExtent; z <= gridHalfExtent; ++z)
     {

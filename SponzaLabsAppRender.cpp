@@ -19,13 +19,6 @@ namespace
         auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource, before, after);
         commandList->ResourceBarrier(1, &barrier);
     }
-
-    void FillOverlayRect(HDC dc, const RECT& rect, COLORREF color)
-    {
-        HBRUSH brush = CreateSolidBrush(color);
-        FillRect(dc, &rect, brush);
-        DeleteObject(brush);
-    }
 }
 
 void SponzaLabsApp::Draw(const GameTimer& gt)
@@ -54,72 +47,10 @@ void SponzaLabsApp::Draw(const GameTimer& gt)
     mCommandQueue->ExecuteCommandLists(_countof(commandLists), commandLists);
 
     ThrowIfFailed(mSwapChain->Present(0, 0));
-    DrawHelpOverlay();
     mCurrBackBuffer = (mCurrBackBuffer + 1) % SwapChainBufferCount;
 
     mCurrFrameResource->Fence = ++mCurrentFence;
     mCommandQueue->Signal(mFence.Get(), mCurrentFence);
-}
-
-void SponzaLabsApp::DrawHelpOverlay() const
-{
-    if(!mShowHelpOverlay || mhMainWnd == nullptr)
-    {
-        return;
-    }
-
-    const std::wstring renderMode = mRenderMode == RenderMode::Deferred ? L"Deferred" : L"Forward";
-    const std::wstring overlayText =
-        L"Controls\n"
-        L"W/A/S/D  move camera\n"
-        L"Mouse    rotate camera\n"
-        L"1        forward render\n"
-        L"2        deferred render\n"
-        L"F        frustum culling: " + std::wstring(mEnableFrustumCulling ? L"ON" : L"OFF") + L"\n"
-        L"O        octree: " + std::wstring(mEnableOctree ? L"ON" : L"OFF") + L"\n"
-        L"T        tessellation: " + std::wstring(mEnableTessellation ? L"ON" : L"OFF") + L"\n"
-        L"H        hide help\n"
-        L"Mode     " + renderMode + L"\n"
-        L"Scatter  " + std::to_wstring(mVisibleScatterItems.size()) + L"/" + std::to_wstring(mScatterItems.size());
-
-    HDC dc = GetDC(mhMainWnd);
-    if(dc == nullptr)
-    {
-        return;
-    }
-
-    RECT panelRect = { 12, 12, 290, 222 };
-    FillOverlayRect(dc, panelRect, RGB(18, 24, 31));
-
-    RECT borderRect = panelRect;
-    FrameRect(dc, &borderRect, static_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)));
-
-    SetBkMode(dc, TRANSPARENT);
-    SetTextColor(dc, RGB(238, 242, 247));
-
-    HFONT font = CreateFontW(
-        -18,
-        0,
-        0,
-        0,
-        FW_MEDIUM,
-        FALSE,
-        FALSE,
-        FALSE,
-        DEFAULT_CHARSET,
-        OUT_DEFAULT_PRECIS,
-        CLIP_DEFAULT_PRECIS,
-        CLEARTYPE_QUALITY,
-        DEFAULT_PITCH | FF_SWISS,
-        L"Segoe UI");
-    HFONT oldFont = static_cast<HFONT>(SelectObject(dc, font));
-
-    RECT textRect = { panelRect.left + 12, panelRect.top + 10, panelRect.right - 12, panelRect.bottom - 10 };
-    DrawTextW(dc, overlayText.c_str(), -1, &textRect, DT_LEFT | DT_TOP | DT_NOPREFIX);
-
-    SelectObject(dc, oldFont);
-    DeleteObject(font);
-    ReleaseDC(mhMainWnd, dc);
 }
 
 void SponzaLabsApp::DrawRenderItems(ID3D12GraphicsCommandList* commandList, const std::vector<RenderItem*>& renderItems)

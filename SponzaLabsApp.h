@@ -56,6 +56,7 @@ public:
     ~SponzaLabsApp();
 
     bool Initialize() override;
+    LRESULT MsgProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) override;
 
 private:
     void OnResize() override;
@@ -93,7 +94,9 @@ private:
     void DrawForwardPass();
     void DrawDeferredPass();
     void DrawTessellationPass();
-    void DrawHelpOverlay() const;
+    void CreateHelpOverlay();
+    void LayoutHelpOverlay();
+    void UpdateHelpOverlay();
 
     int ResolveTextureIndex(const std::wstring& texturePath, const std::string& fallbackName) const;
     Material* FindMaterialByName(const std::string& name);
@@ -144,6 +147,10 @@ private:
     bool mEnableTessellation = true;
     bool mShowHelpOverlay = true;
     std::array<bool, 256> mKeyState = {};
+
+    HWND mHelpOverlayWnd = nullptr;
+    HBRUSH mHelpOverlayBrush = nullptr;
+    HFONT mHelpOverlayFont = nullptr;
 
     POINT mLastMousePos = {};
 };
