@@ -107,7 +107,7 @@ DomainOutput DS(PatchTess patchTess, float2 uv : SV_DomainLocation, const Output
     float4 texCoords = mul(float4(texC, 0.0f, 1.0f), gTexTransform);
     output.TexC = mul(texCoords, matData.MatTransform).xy;
 
-    float displacement = gTextureMaps[matData.NormalMapIndex].SampleLevel(gsamAnisotropicWrap, output.TexC, 0.0f).a;
+    float displacement = gTextureMaps[matData.DisplacementMapIndex].SampleLevel(gsamAnisotropicWrap, output.TexC, 0.0f).a;
     posL += normalL * ((displacement - 0.5f) * 0.5f);
 
     float4 posW = mul(float4(posL, 1.0f), gWorld);

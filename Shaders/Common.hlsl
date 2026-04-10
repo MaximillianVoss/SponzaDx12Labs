@@ -26,8 +26,8 @@ struct MaterialData
 	float4x4 MatTransform;
 	uint     DiffuseMapIndex;
 	uint     NormalMapIndex;
+	uint     DisplacementMapIndex;
 	uint     MatPad1;
-	uint     MatPad2;
 };
 
 // An array of textures, which is only supported in shader model 5.1+.  Unlike Texture2DArray, the textures

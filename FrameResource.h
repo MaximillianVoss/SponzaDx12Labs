@@ -51,8 +51,8 @@ struct MaterialData
 
 	UINT DiffuseMapIndex = 0;
 	UINT NormalMapIndex = 0;
-	UINT MaterialPad1;
-	UINT MaterialPad2;
+	UINT DisplacementMapIndex = 0;
+	UINT MaterialPad1 = 0;
 };
 
 struct Vertex

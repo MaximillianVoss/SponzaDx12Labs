@@ -211,6 +211,7 @@ void SponzaLabsApp::UpdateMaterialBuffer(const GameTimer& gt)
         XMStoreFloat4x4(&materialData.MatTransform, XMMatrixTranspose(XMLoadFloat4x4(&material->MatTransform)));
         materialData.DiffuseMapIndex = material->DiffuseSrvHeapIndex;
         materialData.NormalMapIndex = material->NormalSrvHeapIndex;
+        materialData.DisplacementMapIndex = material->DisplacementSrvHeapIndex;
 
         currentMaterialBuffer->CopyData(material->MatCBIndex, materialData);
         material->NumFramesDirty--;

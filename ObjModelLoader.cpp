@@ -255,6 +255,7 @@ namespace
         }
 
         info.NormalTexturePath = ResolveTexturePath(root, normalTexture);
+        info.DisplacementTexturePath = ResolveTexturePath(root, material.displacement_texname);
         info.AlphaTexturePath = ResolveTexturePath(root, material.alpha_texname);
         info.AlphaTested = !material.alpha_texname.empty() || material.dissolve < 0.999f;
         return info;

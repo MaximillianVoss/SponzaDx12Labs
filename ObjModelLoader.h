@@ -9,6 +9,7 @@ struct ObjMaterialInfo
     std::string Name;
     std::wstring DiffuseTexturePath;
     std::wstring NormalTexturePath;
+    std::wstring DisplacementTexturePath;
     std::wstring AlphaTexturePath;
     DirectX::XMFLOAT4 DiffuseAlbedo = { 1.0f, 1.0f, 1.0f, 1.0f };
     DirectX::XMFLOAT3 FresnelR0 = { 0.04f, 0.04f, 0.04f };

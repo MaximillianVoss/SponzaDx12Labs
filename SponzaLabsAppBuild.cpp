@@ -131,6 +131,7 @@ void SponzaLabsApp::LoadTextures()
 
     addGeneratedTexture("defaultDiffuseMap", { 255, 255, 255, 255 });
     addGeneratedTexture("defaultNormalMap", { 128, 128, 255, 255 });
+    addGeneratedTexture("defaultDisplacementMap", { 128, 128, 128, 128 });
 
     std::set<std::wstring> uniqueTexturePaths;
     for(const ObjMaterialInfo& material : mSceneData.Materials)
@@ -142,6 +143,10 @@ void SponzaLabsApp::LoadTextures()
         if(!material.NormalTexturePath.empty())
         {
             uniqueTexturePaths.insert(material.NormalTexturePath);
+        }
+        if(!material.DisplacementTexturePath.empty())
+        {
+            uniqueTexturePaths.insert(material.DisplacementTexturePath);
         }
     }
 
@@ -426,6 +431,7 @@ void SponzaLabsApp::BuildMaterials()
         material->MatCBIndex = materialIndex++;
         material->DiffuseSrvHeapIndex = ResolveTextureIndex(materialInfo.DiffuseTexturePath, "defaultDiffuseMap");
         material->NormalSrvHeapIndex = ResolveTextureIndex(materialInfo.NormalTexturePath, "defaultNormalMap");
+        material->DisplacementSrvHeapIndex = ResolveTextureIndex(materialInfo.DisplacementTexturePath, "defaultDisplacementMap");
         material->DiffuseAlbedo = materialInfo.DiffuseAlbedo;
         material->FresnelR0 = materialInfo.FresnelR0;
         material->Roughness = materialInfo.Roughness;
@@ -443,6 +449,7 @@ void SponzaLabsApp::BuildMaterials()
     animatedFloor->MatCBIndex = materialIndex++;
     animatedFloor->DiffuseSrvHeapIndex = sourceFloor->DiffuseSrvHeapIndex;
     animatedFloor->NormalSrvHeapIndex = sourceFloor->NormalSrvHeapIndex;
+    animatedFloor->DisplacementSrvHeapIndex = sourceFloor->DisplacementSrvHeapIndex;
     animatedFloor->DiffuseAlbedo = sourceFloor->DiffuseAlbedo;
     animatedFloor->FresnelR0 = XMFLOAT3(0.08f, 0.08f, 0.08f);
     animatedFloor->Roughness = 0.3f;
@@ -459,6 +466,7 @@ void SponzaLabsApp::BuildMaterials()
     scatterBricks->MatCBIndex = materialIndex++;
     scatterBricks->DiffuseSrvHeapIndex = sourceBricks->DiffuseSrvHeapIndex;
     scatterBricks->NormalSrvHeapIndex = sourceBricks->NormalSrvHeapIndex;
+    scatterBricks->DisplacementSrvHeapIndex = sourceBricks->DisplacementSrvHeapIndex;
     scatterBricks->DiffuseAlbedo = XMFLOAT4(0.95f, 0.95f, 0.95f, 1.0f);
     scatterBricks->FresnelR0 = XMFLOAT3(0.04f, 0.04f, 0.04f);
     scatterBricks->Roughness = 0.45f;
