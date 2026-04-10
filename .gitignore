@@ -5,7 +5,6 @@ Build/
 *.opendb
 *.ilk
 *.pdb
-*.obj
 *.tlog
 *.lastbuildstate
 *.log
@@ -16,3 +15,4 @@ Build/
 *.ncb
 *.lib
 *.exp
+Thumbs.db
