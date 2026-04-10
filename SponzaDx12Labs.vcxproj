@@ -187,6 +187,19 @@
     <ClInclude Include="SponzaLabsApp.h" />
     <ClInclude Include="TgaTextureLoader.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="lab-1.md" />
+    <None Include="lab-2.md" />
+    <None Include="lab-3.md" />
+    <None Include="lab-4.md" />
+    <None Include="Shaders\Common.hlsl" />
+    <None Include="Shaders\Default.hlsl" />
+    <None Include="Shaders\DeferredLighting.hlsl" />
+    <None Include="Shaders\GBuffer.hlsl" />
+    <None Include="Shaders\LightingUtil.hlsl" />
+    <None Include="Shaders\Sky.hlsl" />
+    <None Include="Shaders\Tessellation.hlsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
