@@ -58,6 +58,8 @@ SponzaLabsApp::~SponzaLabsApp()
 
 bool SponzaLabsApp::Initialize()
 {
+    d3dUtil::EnsureProjectWorkingDirectory();
+
     if(!D3DApp::Initialize())
     {
         return false;

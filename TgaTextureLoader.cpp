@@ -16,8 +16,12 @@ namespace
         }
 
         const int size = WideCharToMultiByte(CP_UTF8, 0, value.c_str(), -1, nullptr, 0, nullptr, nullptr);
-        std::string utf8(size > 0 ? size - 1 : 0, '\0');
+        std::string utf8(size > 0 ? size : 0, '\0');
         WideCharToMultiByte(CP_UTF8, 0, value.c_str(), -1, utf8.data(), size, nullptr, nullptr);
+        if(!utf8.empty())
+        {
+            utf8.pop_back();
+        }
         return utf8;
     }
 }

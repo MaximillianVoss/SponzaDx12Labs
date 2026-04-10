@@ -22,6 +22,7 @@
 #include <array>
 #include <unordered_map>
 #include <cstdint>
+#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <cassert>
@@ -93,6 +94,10 @@ class d3dUtil
 public:
 
     static bool IsKeyDown(int vkeyCode);
+    static std::filesystem::path GetExecutableDirectory();
+    static std::filesystem::path FindProjectRoot();
+    static std::filesystem::path ResolveProjectPath(const std::filesystem::path& path);
+    static void EnsureProjectWorkingDirectory();
 
     static std::string ToString(HRESULT hr);
 

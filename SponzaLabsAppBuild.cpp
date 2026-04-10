@@ -111,7 +111,7 @@ namespace
 
 void SponzaLabsApp::LoadSceneData()
 {
-    const std::filesystem::path scenePath = std::filesystem::path(L"Assets") / L"Sponza-master" / L"sponza.obj";
+    const std::filesystem::path scenePath = d3dUtil::ResolveProjectPath(std::filesystem::path(L"Assets") / L"Sponza-master" / L"sponza.obj");
     mSceneData = ObjModelLoader::LoadFromFile(scenePath);
 }
 

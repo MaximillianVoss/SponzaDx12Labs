@@ -5,6 +5,53 @@
 
 using Microsoft::WRL::ComPtr;
 
+namespace
+{
+    namespace fs = std::filesystem;
+
+    bool IsProjectRoot(const fs::path& candidate)
+    {
+        return fs::exists(candidate / "Assets")
+            && fs::exists(candidate / "Shaders")
+            && fs::exists(candidate / "SponzaDx12Labs.vcxproj");
+    }
+
+    fs::path FindRootFrom(fs::path start)
+    {
+        if(start.empty())
+        {
+            return {};
+        }
+
+        std::error_code errorCode;
+        start = fs::weakly_canonical(start, errorCode);
+        if(errorCode)
+        {
+            start = start.lexically_normal();
+        }
+
+        if(fs::is_regular_file(start, errorCode))
+        {
+            start = start.parent_path();
+        }
+
+        for(fs::path current = start; !current.empty(); current = current.parent_path())
+        {
+            if(IsProjectRoot(current))
+            {
+                return current;
+            }
+
+            if(current == current.root_path())
+            {
+                break;
+            }
+        }
+
+        return {};
+    }
+}
+
 DxException::DxException(HRESULT hr, const std::wstring& functionName, const std::wstring& filename, int lineNumber) :
     ErrorCode(hr),
     FunctionName(functionName),
@@ -18,9 +65,62 @@ bool d3dUtil::IsKeyDown(int vkeyCode)
     return (GetAsyncKeyState(vkeyCode) & 0x8000) != 0;
 }
 
+std::filesystem::path d3dUtil::GetExecutableDirectory()
+{
+    std::array<wchar_t, 32768> buffer = {};
+    const DWORD length = GetModuleFileNameW(nullptr, buffer.data(), static_cast<DWORD>(buffer.size()));
+    if(length == 0 || length == buffer.size())
+    {
+        throw std::runtime_error("Failed to query executable path.");
+    }
+
+    return std::filesystem::path(buffer.data(), buffer.data() + length).parent_path();
+}
+
+std::filesystem::path d3dUtil::FindProjectRoot()
+{
+    static const std::filesystem::path projectRoot = []()
+    {
+        if(auto fromExecutable = FindRootFrom(GetExecutableDirectory()); !fromExecutable.empty())
+        {
+            return fromExecutable;
+        }
+
+        if(auto fromCurrentDir = FindRootFrom(std::filesystem::current_path()); !fromCurrentDir.empty())
+        {
+            return fromCurrentDir;
+        }
+
+        throw std::runtime_error("Failed to locate project root containing Assets and Shaders.");
+    }();
+
+    return projectRoot;
+}
+
+std::filesystem::path d3dUtil::ResolveProjectPath(const std::filesystem::path& path)
+{
+    if(path.is_absolute())
+    {
+        return path.lexically_normal();
+    }
+
+    return (FindProjectRoot() / path).lexically_normal();
+}
+
+void d3dUtil::EnsureProjectWorkingDirectory()
+{
+    const std::filesystem::path root = FindProjectRoot();
+    SetCurrentDirectoryW(root.c_str());
+}
+
 ComPtr<ID3DBlob> d3dUtil::LoadBinary(const std::wstring& filename)
 {
-    std::ifstream fin(filename, std::ios::binary);
+    const std::filesystem::path resolvedPath = ResolveProjectPath(filename);
+    std::ifstream fin(resolvedPath, std::ios::binary);
+    if(!fin)
+    {
+        throw std::runtime_error("Failed to open binary file: " + resolvedPath.string());
+    }
 
     fin.seekg(0, std::ios_base::end);
     std::ifstream::pos_type size = (int)fin.tellg();
@@ -106,7 +206,8 @@ ComPtr<ID3DBlob> d3dUtil::CompileShader(
 
 	ComPtr<ID3DBlob> byteCode = nullptr;
 	ComPtr<ID3DBlob> errors;
-	hr = D3DCompileFromFile(filename.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+    const std::filesystem::path resolvedPath = ResolveProjectPath(filename);
+	hr = D3DCompileFromFile(resolvedPath.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		entrypoint.c_str(), target.c_str(), compileFlags, 0, &byteCode, &errors);
 
 	if(errors != nullptr)
