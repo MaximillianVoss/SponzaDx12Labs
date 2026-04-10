@@ -141,10 +141,6 @@ void SponzaLabsApp::LoadTextures()
         {
             uniqueTexturePaths.insert(material.NormalTexturePath);
         }
-        if(!material.AlphaTexturePath.empty())
-        {
-            uniqueTexturePaths.insert(material.AlphaTexturePath);
-        }
     }
 
     for(const std::wstring& texturePath : uniqueTexturePaths)
