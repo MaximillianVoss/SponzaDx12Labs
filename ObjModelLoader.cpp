@@ -13,6 +13,7 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "ThirdParty/tiny_obj_loader.h"
 
+#include <fstream>
 #include <numeric>
 #include <unordered_map>
 
@@ -54,6 +55,40 @@ namespace
         std::vector<XMFLOAT3> TangentAccumulation;
         std::unordered_map<VertexKey, std::uint32_t, VertexKeyHasher> VertexLookup;
         std::vector<XMFLOAT3> Positions;
+    };
+
+    class FilesystemMaterialReader : public tinyobj::MaterialReader
+    {
+    public:
+        explicit FilesystemMaterialReader(std::filesystem::path baseDirectory)
+            : mBaseDirectory(std::move(baseDirectory))
+        {
+        }
+
+        bool operator()(
+            const std::string& materialId,
+            std::vector<tinyobj::material_t>* materials,
+            std::map<std::string, int>* materialMap,
+            std::string* warn,
+            std::string* err) override
+        {
+            const std::filesystem::path materialPath = (mBaseDirectory / std::filesystem::path(materialId)).lexically_normal();
+            std::ifstream input(materialPath, std::ios::binary);
+            if(!input)
+            {
+                if(err)
+                {
+                    *err += "Cannot open file [" + materialPath.string() + "]";
+                }
+                return false;
+            }
+
+            tinyobj::MaterialStreamReader streamReader(input);
+            return streamReader(materialId, materials, materialMap, warn, err);
+        }
+
+    private:
+        std::filesystem::path mBaseDirectory;
     };
 
     XMFLOAT3 LoadPosition(const tinyobj::attrib_t& attrib, int index)
@@ -228,25 +263,37 @@ namespace
 
 ObjSceneData ObjModelLoader::LoadFromFile(const std::filesystem::path& objPath)
 {
-    tinyobj::ObjReaderConfig config = {};
-    config.triangulate = true;
-    config.vertex_color = false;
-    config.mtl_search_path = objPath.parent_path().string();
-
-    tinyobj::ObjReader reader;
-    if(!reader.ParseFromFile(objPath.string(), config))
+    std::ifstream objStream(objPath, std::ios::binary);
+    if(!objStream)
     {
-        throw std::runtime_error(reader.Error().empty() ? "Failed to parse OBJ file." : reader.Error());
+        throw std::runtime_error("Cannot open file [" + objPath.string() + "]");
     }
 
-    if(!reader.Warning().empty())
+    tinyobj::attrib_t attrib;
+    std::vector<tinyobj::shape_t> shapes;
+    std::vector<tinyobj::material_t> inputMaterials;
+    std::string warning;
+    std::string error;
+
+    FilesystemMaterialReader materialReader(objPath.parent_path());
+    if(!tinyobj::LoadObj(
+        &attrib,
+        &shapes,
+        &inputMaterials,
+        &warning,
+        &error,
+        &objStream,
+        &materialReader,
+        true,
+        false))
     {
-        OutputDebugStringA(reader.Warning().c_str());
+        throw std::runtime_error(error.empty() ? "Failed to parse OBJ file." : error);
     }
 
-    const tinyobj::attrib_t& attrib = reader.GetAttrib();
-    const std::vector<tinyobj::shape_t>& shapes = reader.GetShapes();
-    const std::vector<tinyobj::material_t>& inputMaterials = reader.GetMaterials();
+    if(!warning.empty())
+    {
+        OutputDebugStringA(warning.c_str());
+    }
 
     ObjSceneData scene = {};
     scene.Materials.reserve((std::max<size_t>)(1, inputMaterials.size()));
