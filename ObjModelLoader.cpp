@@ -379,7 +379,7 @@ ObjSceneData ObjModelLoader::LoadFromFile(const std::filesystem::path& objPath)
         scene.Vertices.insert(scene.Vertices.end(), builder.Vertices.begin(), builder.Vertices.end());
         for(std::uint32_t localIndex : builder.Indices)
         {
-            scene.Indices.push_back(localIndex + static_cast<std::uint32_t>(submesh.BaseVertexLocation));
+            scene.Indices.push_back(localIndex);
         }
 
         if(!builder.Positions.empty())
