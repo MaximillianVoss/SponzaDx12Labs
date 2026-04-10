@@ -14,6 +14,8 @@ using Microsoft::WRL::ComPtr;
 
 namespace
 {
+    constexpr UINT kTextureRegisterCount = 128;
+
     const D3D_SHADER_MACRO gLightingDefines[] =
     {
         "NUM_DIR_LIGHTS", "1",
@@ -157,7 +159,7 @@ void SponzaLabsApp::LoadTextures()
 void SponzaLabsApp::BuildRootSignature()
 {
     CD3DX12_DESCRIPTOR_RANGE textureTable;
-    textureTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, static_cast<UINT>(mTextureHeapOrder.size()), 0, 0);
+    textureTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, kTextureRegisterCount, 0, 0);
 
     CD3DX12_ROOT_PARAMETER rootParameters[4];
     rootParameters[0].InitAsConstantBufferView(0);
@@ -235,7 +237,7 @@ void SponzaLabsApp::BuildLightingRootSignature()
 void SponzaLabsApp::BuildDescriptorHeaps()
 {
     D3D12_DESCRIPTOR_HEAP_DESC descriptorHeapDesc = {};
-    descriptorHeapDesc.NumDescriptors = static_cast<UINT>(mTextureHeapOrder.size());
+    descriptorHeapDesc.NumDescriptors = kTextureRegisterCount;
     descriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
     descriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     ThrowIfFailed(md3dDevice->CreateDescriptorHeap(&descriptorHeapDesc, IID_PPV_ARGS(mSrvDescriptorHeap.ReleaseAndGetAddressOf())));
@@ -254,6 +256,15 @@ void SponzaLabsApp::BuildDescriptorHeaps()
         srvDesc.Texture2D.MipLevels = texture->Resource->GetDesc().MipLevels;
         md3dDevice->CreateShaderResourceView(texture->Resource.Get(), &srvDesc, handle);
         mTextureSrvLookup[texture->Name] = index;
+        handle.Offset(1, mCbvSrvUavDescriptorSize);
+    }
+
+    Texture* fallbackTexture = mTextures["defaultDiffuseMap"].get();
+    srvDesc.Format = fallbackTexture->Resource->GetDesc().Format;
+    srvDesc.Texture2D.MipLevels = fallbackTexture->Resource->GetDesc().MipLevels;
+    for(UINT index = static_cast<UINT>(mTextureHeapOrder.size()); index < kTextureRegisterCount; ++index)
+    {
+        md3dDevice->CreateShaderResourceView(fallbackTexture->Resource.Get(), &srvDesc, handle);
         handle.Offset(1, mCbvSrvUavDescriptorSize);
     }
 }
