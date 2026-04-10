@@ -93,6 +93,7 @@ private:
     void DrawForwardPass();
     void DrawDeferredPass();
     void DrawTessellationPass();
+    void DrawHelpOverlay() const;
 
     int ResolveTextureIndex(const std::wstring& texturePath, const std::string& fallbackName) const;
     Material* FindMaterialByName(const std::string& name);
@@ -141,6 +142,7 @@ private:
     bool mEnableFrustumCulling = true;
     bool mEnableOctree = true;
     bool mEnableTessellation = true;
+    bool mShowHelpOverlay = true;
     std::array<bool, 256> mKeyState = {};
 
     POINT mLastMousePos = {};
