@@ -8,6 +8,8 @@ using namespace DirectX;
 namespace
 {
     constexpr wchar_t kHelpOverlayClassName[] = L"SponzaHelpOverlayWindow";
+    constexpr int kHelpOverlayWidth = 368;
+    constexpr int kHelpOverlayHeight = 320;
 
     BoundingBox TransformBoundingBox(const BoundingBox& bounds, CXMMATRIX world)
     {
@@ -257,8 +259,8 @@ void SponzaLabsApp::CreateHelpOverlay()
         WS_POPUP | WS_VISIBLE,
         0,
         0,
-        368,
-        286,
+        kHelpOverlayWidth,
+        kHelpOverlayHeight,
         mhMainWnd,
         nullptr,
         AppInst(),
@@ -283,8 +285,8 @@ void SponzaLabsApp::LayoutHelpOverlay()
         HWND_TOPMOST,
         windowRect.left + 14,
         windowRect.top + 38,
-        368,
-        286,
+        kHelpOverlayWidth,
+        kHelpOverlayHeight,
         SWP_NOACTIVATE | SWP_SHOWWINDOW);
 }
 
