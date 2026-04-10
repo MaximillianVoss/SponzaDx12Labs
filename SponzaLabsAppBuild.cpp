@@ -546,8 +546,8 @@ void SponzaLabsApp::BuildScatterItems()
     UINT nextObjectIndex = static_cast<UINT>(mAllRitems.size());
     const int gridHalfExtent = 12;
     const float spacing = 3.2f;
-    const float scatterOriginX = mSceneFocusPoint.x + mSceneRadius * 4.5f;
-    const float scatterOriginZ = mSceneFocusPoint.z + mSceneRadius * 2.8f;
+    const float scatterOriginX = mSceneFocusPoint.x + mSceneRadius * 10.0f;
+    const float scatterOriginZ = mSceneFocusPoint.z + mSceneRadius * 8.0f;
 
     for(int z = -gridHalfExtent; z <= gridHalfExtent; ++z)
     {

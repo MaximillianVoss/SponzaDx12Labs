@@ -151,6 +151,7 @@ private:
     HWND mHelpOverlayWnd = nullptr;
     HBRUSH mHelpOverlayBrush = nullptr;
     HFONT mHelpOverlayFont = nullptr;
+    std::wstring mHelpOverlayText;
 
     POINT mLastMousePos = {};
 };

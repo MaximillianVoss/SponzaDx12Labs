@@ -7,11 +7,74 @@ using namespace DirectX;
 
 namespace
 {
+    constexpr wchar_t kHelpOverlayClassName[] = L"SponzaHelpOverlayWindow";
+
     BoundingBox TransformBoundingBox(const BoundingBox& bounds, CXMMATRIX world)
     {
         BoundingBox transformed;
         bounds.Transform(transformed, world);
         return transformed;
+    }
+
+    LRESULT CALLBACK HelpOverlayWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+    {
+        switch(msg)
+        {
+        case WM_NCCREATE:
+        {
+            return TRUE;
+        }
+
+        case WM_ERASEBKGND:
+            return TRUE;
+
+        case WM_PAINT:
+        {
+            PAINTSTRUCT ps = {};
+            HDC dc = BeginPaint(hwnd, &ps);
+
+            RECT rect = {};
+            GetClientRect(hwnd, &rect);
+            HBRUSH brush = CreateSolidBrush(RGB(18, 24, 31));
+            FillRect(dc, &rect, brush);
+            FrameRect(dc, &rect, static_cast<HBRUSH>(GetStockObject(GRAY_BRUSH)));
+            DeleteObject(brush);
+
+            SetBkMode(dc, TRANSPARENT);
+            SetTextColor(dc, RGB(238, 242, 247));
+
+            HFONT font = CreateFontW(
+                -17,
+                0,
+                0,
+                0,
+                FW_MEDIUM,
+                FALSE,
+                FALSE,
+                FALSE,
+                DEFAULT_CHARSET,
+                OUT_DEFAULT_PRECIS,
+                CLIP_DEFAULT_PRECIS,
+                CLEARTYPE_QUALITY,
+                DEFAULT_PITCH | FF_SWISS,
+                L"Segoe UI");
+            HFONT oldFont = static_cast<HFONT>(SelectObject(dc, font));
+
+            RECT textRect = { 12, 10, rect.right - 12, rect.bottom - 10 };
+            const int textLength = GetWindowTextLengthW(hwnd);
+            std::wstring text(textLength, L'\0');
+            GetWindowTextW(hwnd, text.data(), textLength + 1);
+            DrawTextW(dc, text.c_str(), -1, &textRect, DT_LEFT | DT_TOP | DT_NOPREFIX);
+
+            SelectObject(dc, oldFont);
+            DeleteObject(font);
+
+            EndPaint(hwnd, &ps);
+            return 0;
+        }
+        }
+
+        return DefWindowProc(hwnd, msg, wParam, lParam);
     }
 }
 
@@ -136,12 +199,12 @@ void SponzaLabsApp::ResetCameraToScene()
 {
     const XMFLOAT3 target(
         mSceneFocusPoint.x,
-        5.2f,
-        mSceneFocusPoint.z + mSceneRadius * 0.28f);
+        3.0f,
+        mSceneFocusPoint.z + mSceneRadius * 0.10f);
     const XMFLOAT3 position(
-        mSceneFocusPoint.x,
-        5.8f,
-        mSceneFocusPoint.z - mSceneRadius * 0.58f);
+        mSceneFocusPoint.x - mSceneRadius * 0.02f,
+        1.9f,
+        mSceneFocusPoint.z - mSceneRadius * 0.18f);
 
     mCamera.LookAt(position, target, XMFLOAT3(0.0f, 1.0f, 0.0f));
     mCamera.UpdateViewMatrix();
@@ -174,30 +237,26 @@ void SponzaLabsApp::CreateHelpOverlay()
         return;
     }
 
-    mHelpOverlayBrush = CreateSolidBrush(RGB(18, 24, 31));
-    mHelpOverlayFont = CreateFontW(
-        -17,
-        0,
-        0,
-        0,
-        FW_MEDIUM,
-        FALSE,
-        FALSE,
-        FALSE,
-        DEFAULT_CHARSET,
-        OUT_DEFAULT_PRECIS,
-        CLIP_DEFAULT_PRECIS,
-        CLEARTYPE_QUALITY,
-        DEFAULT_PITCH | FF_SWISS,
-        L"Segoe UI");
+    static bool classRegistered = false;
+    if(!classRegistered)
+    {
+        WNDCLASSW wc = {};
+        wc.lpfnWndProc = HelpOverlayWndProc;
+        wc.hInstance = AppInst();
+        wc.hCursor = LoadCursor(nullptr, IDC_ARROW);
+        wc.hbrBackground = nullptr;
+        wc.lpszClassName = kHelpOverlayClassName;
+        RegisterClassW(&wc);
+        classRegistered = true;
+    }
 
     mHelpOverlayWnd = CreateWindowExW(
-        0,
-        L"STATIC",
+        WS_EX_TOOLWINDOW | WS_EX_TOPMOST | WS_EX_NOACTIVATE,
+        kHelpOverlayClassName,
         L"",
-        WS_CHILD | WS_VISIBLE | WS_BORDER | SS_LEFT | SS_NOPREFIX,
-        12,
-        12,
+        WS_POPUP | WS_VISIBLE,
+        0,
+        0,
         368,
         286,
         mhMainWnd,
@@ -205,7 +264,6 @@ void SponzaLabsApp::CreateHelpOverlay()
         AppInst(),
         nullptr);
 
-    SendMessageW(mHelpOverlayWnd, WM_SETFONT, reinterpret_cast<WPARAM>(mHelpOverlayFont), TRUE);
     LayoutHelpOverlay();
     UpdateHelpOverlay();
 }
@@ -217,7 +275,17 @@ void SponzaLabsApp::LayoutHelpOverlay()
         return;
     }
 
-    SetWindowPos(mHelpOverlayWnd, HWND_TOP, 14, 14, 368, 286, SWP_NOACTIVATE);
+    RECT windowRect = {};
+    GetWindowRect(mhMainWnd, &windowRect);
+
+    SetWindowPos(
+        mHelpOverlayWnd,
+        HWND_TOPMOST,
+        windowRect.left + 14,
+        windowRect.top + 38,
+        368,
+        286,
+        SWP_NOACTIVATE | SWP_SHOWWINDOW);
 }
 
 void SponzaLabsApp::UpdateHelpOverlay()
@@ -242,8 +310,10 @@ void SponzaLabsApp::UpdateHelpOverlay()
         L"Mode            " + renderMode + L"\r\n"
         L"Scatter         " + std::to_wstring(mVisibleScatterItems.size()) + L" / " + std::to_wstring(mScatterItems.size());
 
+    mHelpOverlayText = overlayText;
     SetWindowTextW(mHelpOverlayWnd, overlayText.c_str());
-    ShowWindow(mHelpOverlayWnd, mShowHelpOverlay ? SW_SHOW : SW_HIDE);
+    InvalidateRect(mHelpOverlayWnd, nullptr, TRUE);
+    ShowWindow(mHelpOverlayWnd, mShowHelpOverlay ? SW_SHOWNOACTIVATE : SW_HIDE);
 }
 
 void SponzaLabsApp::OnResize()
