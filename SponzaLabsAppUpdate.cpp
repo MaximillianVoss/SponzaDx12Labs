@@ -25,6 +25,7 @@ void SponzaLabsApp::Update(const GameTimer& gt)
     UpdateObjectCBs(gt);
     UpdateMaterialBuffer(gt);
     UpdateMainPassCB(gt);
+    UpdateWindowCaption();
 }
 
 void SponzaLabsApp::OnMouseDown(WPARAM btnState, int x, int y)

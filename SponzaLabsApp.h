@@ -72,6 +72,8 @@ private:
     void UpdateObjectCBs(const GameTimer& gt);
     void UpdateMaterialBuffer(const GameTimer& gt);
     void UpdateMainPassCB(const GameTimer& gt);
+    void ResetCameraToScene();
+    void UpdateWindowCaption();
 
     void LoadSceneData();
     void LoadTextures();
@@ -132,6 +134,8 @@ private:
     SceneOctree mScatterOctree;
 
     PassConstants mMainPassCB;
+    DirectX::XMFLOAT3 mSceneFocusPoint = { 0.0f, 6.0f, 0.0f };
+    float mSceneRadius = 12.0f;
 
     RenderMode mRenderMode = RenderMode::Deferred;
     bool mEnableFrustumCulling = true;

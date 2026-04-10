@@ -46,6 +46,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 SponzaLabsApp::SponzaLabsApp(HINSTANCE hInstance)
     : D3DApp(hInstance)
 {
+    mMainWndCaption = L"Sponza DX12 Labs";
 }
 
 SponzaLabsApp::~SponzaLabsApp()
@@ -68,7 +69,6 @@ bool SponzaLabsApp::Initialize()
     ThrowIfFailed(mCommandList->Reset(mDirectCmdListAlloc.Get(), nullptr));
 
     mCbvSrvUavDescriptorSize = md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-    mCamera.SetPosition(0.0f, 6.5f, -24.0f);
 
     mGBuffer.Initialize(md3dDevice.Get());
     mGBufferInitialized = true;
@@ -84,6 +84,8 @@ bool SponzaLabsApp::Initialize()
     BuildMaterials();
     BuildRenderItems();
     BuildScatterItems();
+    ResetCameraToScene();
+    UpdateWindowCaption();
     BuildOctree();
     BuildFrameResources();
     BuildPSOs();
@@ -94,6 +96,37 @@ bool SponzaLabsApp::Initialize()
     FlushCommandQueue();
 
     return true;
+}
+
+void SponzaLabsApp::ResetCameraToScene()
+{
+    const XMFLOAT3 target = mSceneFocusPoint;
+    const XMFLOAT3 position(
+        target.x - mSceneRadius * 0.18f,
+        target.y + mSceneRadius * 0.18f,
+        target.z - mSceneRadius * 1.55f);
+
+    mCamera.LookAt(position, target, XMFLOAT3(0.0f, 1.0f, 0.0f));
+    mCamera.UpdateViewMatrix();
+}
+
+void SponzaLabsApp::UpdateWindowCaption()
+{
+    const std::wstring renderMode = mRenderMode == RenderMode::Deferred ? L"Deferred" : L"Forward";
+    const std::wstring frustumState = mEnableFrustumCulling ? L"ON" : L"OFF";
+    const std::wstring octreeState = mEnableOctree ? L"ON" : L"OFF";
+    const std::wstring tessellationState = mEnableTessellation ? L"ON" : L"OFF";
+
+    const std::wstring caption =
+        L"Sponza DX12 Labs"
+        L" | mode: " + renderMode +
+        L" | frustum: " + frustumState +
+        L" | octree: " + octreeState +
+        L" | tess: " + tessellationState +
+        L" | scatter: " + std::to_wstring(mVisibleScatterItems.size()) + L"/" + std::to_wstring(mScatterItems.size());
+
+    SetWindowText(mhMainWnd, caption.c_str());
+    mMainWndCaption = caption;
 }
 
 void SponzaLabsApp::OnResize()

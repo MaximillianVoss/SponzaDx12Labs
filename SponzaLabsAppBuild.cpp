@@ -469,6 +469,24 @@ void SponzaLabsApp::BuildRenderItems()
 {
     UINT objectIndex = 0;
     MeshGeometry* sponzaGeometry = mGeometries["sponzaGeo"].get();
+    const float sceneHeight = (std::max)(mSceneData.Bounds.Extents.y * 2.0f, 1.0f);
+    const float sceneScale = 18.0f / sceneHeight;
+    const float sceneMinY = mSceneData.Bounds.Center.y - mSceneData.Bounds.Extents.y;
+    const XMMATRIX sceneWorld =
+        XMMatrixScaling(sceneScale, sceneScale, sceneScale) *
+        XMMatrixTranslation(
+            -mSceneData.Bounds.Center.x * sceneScale,
+            -sceneMinY * sceneScale,
+            -mSceneData.Bounds.Center.z * sceneScale);
+
+    const BoundingBox sceneBoundsWorld = TransformBoundingBox(mSceneData.Bounds, sceneWorld);
+    mSceneFocusPoint = XMFLOAT3(
+        sceneBoundsWorld.Center.x,
+        sceneBoundsWorld.Center.y + sceneBoundsWorld.Extents.y * 0.08f,
+        sceneBoundsWorld.Center.z);
+    mSceneRadius = (std::max)(
+        sceneBoundsWorld.Extents.x,
+        (std::max)(sceneBoundsWorld.Extents.y, sceneBoundsWorld.Extents.z));
 
     for(const ObjSubmeshInfo& submesh : mSceneData.Submeshes)
     {
@@ -480,7 +498,8 @@ void SponzaLabsApp::BuildRenderItems()
         renderItem->IndexCount = submesh.IndexCount;
         renderItem->StartIndexLocation = submesh.StartIndexLocation;
         renderItem->BaseVertexLocation = submesh.BaseVertexLocation;
-        renderItem->Bounds = submesh.Bounds;
+        XMStoreFloat4x4(&renderItem->World, sceneWorld);
+        renderItem->Bounds = TransformBoundingBox(submesh.Bounds, sceneWorld);
 
         RenderLayer layer = RenderLayer::Opaque;
         for(const ObjMaterialInfo& materialInfo : mSceneData.Materials)
@@ -504,7 +523,16 @@ void SponzaLabsApp::BuildRenderItems()
     tessellationItem->IndexCount = mGeometries["tessPatchGeo"]->DrawArgs["patch"].IndexCount;
     tessellationItem->StartIndexLocation = mGeometries["tessPatchGeo"]->DrawArgs["patch"].StartIndexLocation;
     tessellationItem->BaseVertexLocation = mGeometries["tessPatchGeo"]->DrawArgs["patch"].BaseVertexLocation;
-    tessellationItem->Bounds = mGeometries["tessPatchGeo"]->DrawArgs["patch"].Bounds;
+    {
+        const XMMATRIX patchWorld =
+            XMMatrixScaling(1.35f, 1.0f, 1.35f) *
+            XMMatrixTranslation(
+                mSceneFocusPoint.x - mSceneRadius * 0.72f,
+                0.02f,
+                mSceneFocusPoint.z - mSceneRadius * 0.86f);
+        XMStoreFloat4x4(&tessellationItem->World, patchWorld);
+        tessellationItem->Bounds = TransformBoundingBox(mGeometries["tessPatchGeo"]->DrawArgs["patch"].Bounds, patchWorld);
+    }
     mRitemLayer[static_cast<int>(RenderLayer::Tessellation)].push_back(tessellationItem.get());
     mAllRitems.push_back(std::move(tessellationItem));
 }
@@ -518,6 +546,8 @@ void SponzaLabsApp::BuildScatterItems()
     UINT nextObjectIndex = static_cast<UINT>(mAllRitems.size());
     const int gridHalfExtent = 12;
     const float spacing = 3.2f;
+    const float scatterOriginX = mSceneFocusPoint.x + mSceneRadius * 3.0f;
+    const float scatterOriginZ = mSceneFocusPoint.z;
 
     for(int z = -gridHalfExtent; z <= gridHalfExtent; ++z)
     {
@@ -534,8 +564,8 @@ void SponzaLabsApp::BuildScatterItems()
             renderItem->ParticipatesInCulling = true;
 
             const float scaleY = 0.5f + (static_cast<float>((x + z + 40) % 4) * 0.35f);
-            const float translationX = x * spacing;
-            const float translationZ = z * spacing;
+            const float translationX = scatterOriginX + x * spacing;
+            const float translationZ = scatterOriginZ + z * spacing;
             const float translationY = 0.5f * scaleY;
 
             const XMMATRIX world = XMMatrixScaling(0.75f, scaleY, 0.75f) * XMMatrixTranslation(translationX, translationY, translationZ);
@@ -547,6 +577,8 @@ void SponzaLabsApp::BuildScatterItems()
             mAllRitems.push_back(std::move(renderItem));
         }
     }
+
+    mVisibleScatterItems = mScatterItems;
 }
 
 void SponzaLabsApp::BuildOctree()
