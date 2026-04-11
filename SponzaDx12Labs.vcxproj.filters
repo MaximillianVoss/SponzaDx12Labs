@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{D44C6C46-5AFA-4D09-B6C2-1C67A28E0D11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\App">
+      <UniqueIdentifier>{DC4AA0FA-C516-4752-BE68-BB4D6E49968C}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Rendering">
+      <UniqueIdentifier>{8C08F095-DB57-4F22-A835-862CAFE39C71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Assets">
+      <UniqueIdentifier>{E8F6BFF8-A371-4C7F-AE55-8F826F692AF8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Common">
+      <UniqueIdentifier>{DE0ECE8E-A341-4CFE-890C-2672B7145A42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{445DDA09-C3F1-49E7-9755-FBF4464EC7EE}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\App">
+      <UniqueIdentifier>{3934883A-EF4C-4EF5-B55A-F88DDE0F3C46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{6A24183D-B150-455B-B1EB-F35136D42F72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Assets">
+      <UniqueIdentifier>{0AF49F80-2AAA-4AFE-8B53-5621A6D5F16B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Common">
+      <UniqueIdentifier>{602DB3A1-E5FA-4683-A535-24A4C562D50B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{D7A6D9B5-6D5D-4464-AFCC-4252557A05EC}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{A2D67DA9-46AB-4877-9BEC-6201C8D7C662}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Common\Camera.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\d3dApp.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\d3dUtil.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\DDSTextureLoader.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\GameTimer.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\GeometryGenerator.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\MathHelper.cpp">
+      <Filter>Source Files\Common</Filter>
+    </ClCompile>
+    <ClCompile Include="FrameResource.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="GBuffer.cpp">
+      <Filter>Source Files\Rendering</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjModelLoader.cpp">
+      <Filter>Source Files\Assets</Filter>
+    </ClCompile>
+    <ClCompile Include="SponzaLabsApp.cpp">
+      <Filter>Source Files\App</Filter>
+    </ClCompile>
+    <ClCompile Include="SponzaLabsAppBuild.cpp">
+      <Filter>Source Files\App</Filter>
+    </ClCompile>
+    <ClCompile Include="SponzaLabsAppRender.cpp">
+      <Filter>Source Files\App</Filter>
+    </ClCompile>
+    <ClCompile Include="SponzaLabsAppUpdate.cpp">
+      <Filter>Source Files\App</Filter>
+    </ClCompile>
+    <ClCompile Include="TgaTextureLoader.cpp">
+      <Filter>Source Files\Assets</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common\Camera.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\d3dApp.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\d3dUtil.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\d3dx12.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DDSTextureLoader.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\GameTimer.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\GeometryGenerator.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\MathHelper.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\UploadBuffer.h">
+      <Filter>Header Files\Common</Filter>
+    </ClInclude>
+    <ClInclude Include="FrameResource.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GBuffer.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjModelLoader.h">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+    <ClInclude Include="Octree.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="SponzaLabsApp.h">
+      <Filter>Header Files\App</Filter>
+    </ClInclude>
+    <ClInclude Include="TgaTextureLoader.h">
+      <Filter>Header Files\Assets</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lab-1.md">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="lab-2.md">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="lab-3.md">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="lab-4.md">
+      <Filter>Docs</Filter>
+    </None>
+    <None Include="Shaders\Common.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Default.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\DeferredLighting.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\GBuffer.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\LightingUtil.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Sky.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="Shaders\Tessellation.hlsl">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+</Project>
