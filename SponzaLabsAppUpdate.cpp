@@ -20,6 +20,7 @@ void SponzaLabsApp::Update(const GameTimer& gt)
         CloseHandle(eventHandle);
     }
 
+    AnimateMaterials(gt);
     UpdateObjectCBs(gt);
     UpdateMaterialBuffer(gt);
     UpdateMainPassCB(gt);
@@ -78,7 +79,7 @@ void SponzaLabsApp::OnKeyboardInput(const GameTimer& gt)
 
 void SponzaLabsApp::AnimateMaterials(const GameTimer& gt)
 {
-    Material* animatedFloor = FindMaterialByName("animatedFloor");
+    Material* animatedFloor = FindMaterialContaining("floor");
     if(animatedFloor == nullptr)
     {
         return;
